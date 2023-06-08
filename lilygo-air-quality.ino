@@ -23,9 +23,16 @@
 #include <Wire.h>
 
 #include "SparkFun_SCD4x_Arduino_Library.h" //Click here to get the library: http://librarymanager/All#SparkFun_SCD4x
-SCD4x mySensor;
+#include "SparkFun_ENS160.h"
+
+// SCD4x
+SCD4x scdSensor;
 #define I2C_SDA 43
 #define I2C_SCL 44
+
+// ENS160
+SparkFun_ENS160 ensSensor;
+int ensStatus; 
 
 void setup()
 {
@@ -33,39 +40,73 @@ void setup()
   Serial.println(F("SCD4x Example"));
   Wire.begin(I2C_SDA, I2C_SCL);
 
-  //mySensor.enableDebugging(); // Uncomment this line to get helpful debug messages on Serial
-
   //.begin will start periodic measurements for us (see the later examples for details on how to override this)
-  if (mySensor.begin() == false)
+  if (scdSensor.begin() == false)
   {
-    Serial.println(F("Sensor not detected. Please check wiring. Freezing..."));
+    Serial.println(F("SCD Sensor not detected. Please check wiring. Freezing..."));
     while (1)
       ;
   }
   // configure SCD4x altitude for calibration
-  mySensor.setSensorAltitude(140);
+  scdSensor.setSensorAltitude(140);
   //The SCD4x has data ready every five seconds
+
+  if (ensSensor.begin() == false)
+  {
+    Serial.println(F("ENS Sensor not detected. Please check wiring. Freezing..."));
+    while (1)
+      ;
+  }
+  // Reset the indoor air quality sensor's settings.
+	if( ensSensor.setOperatingMode(SFE_ENS160_RESET) )
+		Serial.println("ENS Now Ready.");
+	delay(100);
+  // Set to standard operation
+  ensSensor.setOperatingMode(SFE_ENS160_STANDARD);
+  ensStatus = ensSensor.getFlags();
+	Serial.print("Gas Sensor Status Flag: ");
+	Serial.println(ensStatus);
+  Serial.println("Finished ENS sensor init");
+  Serial.println("Exiting Setup");
 }
 
-void loop()
-{
-  if (mySensor.readMeasurement()) // readMeasurement will return true when fresh data is available
+void scdLoop() {
+  if (scdSensor.readMeasurement()) // readMeasurement will return true when fresh data is available
   {
-    Serial.println();
-
     Serial.print(F("CO2(ppm):"));
-    Serial.print(mySensor.getCO2());
+    Serial.print(scdSensor.getCO2());
 
     Serial.print(F("\tTemperature(C):"));
-    Serial.print(mySensor.getTemperature(), 1);
+    Serial.print(scdSensor.getTemperature(), 1);
 
     Serial.print(F("\tHumidity(%RH):"));
-    Serial.print(mySensor.getHumidity(), 1);
+    Serial.print(scdSensor.getHumidity(), 1);
 
     Serial.println();
   }
-  else
-    Serial.print(F("."));
+}
 
-  delay(500);
+void ensLoop()
+{
+	if( ensSensor.checkDataStatus() )
+	{
+		Serial.print("Air Quality Index (1-5) : ");
+		Serial.println(ensSensor.getAQI());
+
+		Serial.print("Total Volatile Organic Compounds: ");
+		Serial.print(ensSensor.getTVOC());
+		Serial.println("ppb");
+
+		Serial.print("CO2 concentration: ");
+		Serial.print(ensSensor.getECO2());
+		Serial.println("ppm");
+	}
+}
+
+
+void loop()
+{
+ scdLoop();
+ ensLoop();
+ delay(500);
 }
