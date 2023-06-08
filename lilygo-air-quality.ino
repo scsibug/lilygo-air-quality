@@ -19,16 +19,63 @@
   Connect SCD40/41 to RedBoard using Qwiic cable.
   Open Serial Monitor at 115200 baud.
 */
-
+// sensors
 #include <Wire.h>
-
 #include "SparkFun_SCD4x_Arduino_Library.h" //Click here to get the library: http://librarymanager/All#SparkFun_SCD4x
 #include "SparkFun_ENS160.h"
+// screen
+#include <TFT_eSPI.h> // Graphics and font library for ST7735 driver chip
+#include <SPI.h>
+
+// ESP32
+/*ESP32S3 pin setup */
+#define PIN_LCD_BL                   38
+
+#define PIN_LCD_D0                   39
+#define PIN_LCD_D1                   40
+#define PIN_LCD_D2                   41
+#define PIN_LCD_D3                   42
+#define PIN_LCD_D4                   45
+#define PIN_LCD_D5                   46
+#define PIN_LCD_D6                   47
+#define PIN_LCD_D7                   48
+
+#define PIN_POWER_ON                 15
+
+#define PIN_LCD_RES                  5
+#define PIN_LCD_CS                   6
+#define PIN_LCD_DC                   7
+#define PIN_LCD_WR                   8
+#define PIN_LCD_RD                   9
+
+#define PIN_BUTTON_1                 0
+#define PIN_BUTTON_2                 14
+#define PIN_BAT_VOLT                 4
+
+#define PIN_IIC_SCL                  17
+#define PIN_IIC_SDA                  18
+
+// Test later without these
+#define PIN_TOUCH_INT                16
+#define PIN_TOUCH_RES                21
+
+#define I2C_SDA 43
+#define I2C_SCL 44
+
+// screen setup
+TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
+
+unsigned long targetTime = 0;
+byte red = 31;
+byte green = 0;
+byte blue = 0;
+byte state = 0;
+unsigned int colour = red << 11;
+uint32_t runing = 0;
+
 
 // SCD4x
 SCD4x scdSensor;
-#define I2C_SDA 43
-#define I2C_SCL 44
 
 // ENS160
 SparkFun_ENS160 ensSensor;
