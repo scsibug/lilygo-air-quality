@@ -88,6 +88,10 @@ void scdLoop() {
 
 void ensLoop()
 {
+  // TODO:
+  // Give values to Air Quality Sensor to improve accuracy
+	//myENS.setTempCompensationCelsius(tempC); 
+	//myENS.setRHCompensationFloat(rh); 
 	if( ensSensor.checkDataStatus() )
 	{
 		Serial.print("Air Quality Index (1-5) : ");
