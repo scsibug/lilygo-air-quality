@@ -2,9 +2,11 @@
 #include <Wire.h>
 #include "SparkFun_SCD4x_Arduino_Library.h" //Click here to get the library: http://librarymanager/All#SparkFun_SCD4x
 #include "SparkFun_ENS160.h"
+
 // screen
 #include <TFT_eSPI.h> // Graphics and font library for ST7735 driver chip
 #include <SPI.h>
+
 // I2C address for ESP32
 #define I2C_SDA 43
 #define I2C_SCL 44
@@ -25,8 +27,7 @@ float humidity_rh_perc;
 int voc_ppb;
 int aqi;
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   Serial.println(F("SCD4x/ENS160 Air Quality Sensor"));
   Wire.begin(I2C_SDA, I2C_SCL);
@@ -43,8 +44,7 @@ void setup()
   tft.fillScreen(TFT_BLACK); delay(100);
 
   //.begin will start periodic measurements
-  if (scdSensor.begin() == false)
-  {
+  if (scdSensor.begin() == false) {
     Serial.println(F("SCD Sensor not detected. Please check wiring. Freezing..."));
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString("SCD Sensor was not detected!", 5, 50, 2);
@@ -53,22 +53,21 @@ void setup()
   // configure SCD4x altitude for calibration.  Change this for your own altitude!
   scdSensor.setSensorAltitude(140);
   //The SCD4x has data ready every five seconds
-  if (ensSensor.begin() == false)
-  {
+  if (ensSensor.begin() == false) {
     Serial.println(F("ENS Sensor not detected. Please check wiring. Freezing..."));
     tft.drawString("ENS Sensor was not detected!", 5, 50, 2);
     while (1);
   }
   // Reset the indoor air quality sensor's settings.
-	if( ensSensor.setOperatingMode(SFE_ENS160_RESET) ) {
-		Serial.println("ENS Now Ready.");
+  if (ensSensor.setOperatingMode(SFE_ENS160_RESET)) {
+    Serial.println("ENS Now Ready.");
   }
-	delay(100);
+  delay(100);
   // Set to standard operation
   ensSensor.setOperatingMode(SFE_ENS160_STANDARD);
   ensStatus = ensSensor.getFlags();
-	Serial.print("Gas Sensor Status Flag: ");
-	Serial.println(ensStatus);
+  Serial.print("Gas Sensor Status Flag: ");
+  Serial.println(ensStatus);
   Serial.println("Finished ENS sensor init");
   Serial.println("Exiting Setup");
 }
@@ -80,6 +79,7 @@ void scdIter() {
     hq_co2_ppm = scdSensor.getCO2();
     temp_c = scdSensor.getTemperature();
     humidity_rh_perc = scdSensor.getHumidity();
+
     Serial.print(F("CO2(ppm):"));
     Serial.print(hq_co2_ppm);
 
@@ -95,22 +95,22 @@ void scdIter() {
 // Read data points from ENS air quality sensor
 void ensIter() {
   // TODO, use these functions to improve AQ sensor accuracy
-	//myENS.setTempCompensationCelsius(tempC);
-	//myENS.setRHCompensationFloat(rh);
-	if( ensSensor.checkDataStatus() ) {
+  //myENS.setTempCompensationCelsius(tempC);
+  //myENS.setRHCompensationFloat(rh);
+  if (ensSensor.checkDataStatus()) {
     voc_ppb = ensSensor.getTVOC();
     aqi = ensSensor.getAQI();
-		Serial.print("Air Quality Index (1-5) : ");
-		Serial.println(aqi);
+    Serial.print("Air Quality Index (1-5) : ");
+    Serial.println(aqi);
 
-		Serial.print("Total Volatile Organic Compounds: ");
-		Serial.print(voc_ppb);
-		Serial.println("ppb");
+    Serial.print("Total Volatile Organic Compounds: ");
+    Serial.print(voc_ppb);
+    Serial.println("ppb");
 
-		Serial.print("CO2 concentration: ");
-		Serial.print(ensSensor.getECO2());
-		Serial.println("ppm");
-	}
+    Serial.print("CO2 concentration: ");
+    Serial.print(ensSensor.getECO2());
+    Serial.println("ppm");
+  }
 }
 
 // Update the screen
@@ -139,8 +139,8 @@ void tftIter() {
 // Main code
 void loop()
 {
- scdIter();
- ensIter();
- tftIter();
- delay(5000);
+  scdIter();
+  ensIter();
+  tftIter();
+  delay(5000);
 }
